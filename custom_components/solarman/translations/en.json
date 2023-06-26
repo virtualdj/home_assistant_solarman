@@ -6,6 +6,7 @@
     "error": {
       "cannot_connect": "Failed to connect",
       "invalid_host": "Invalid hostname or IP address",
+      "no_yaml": "No inverter definition files found",
       "unknown": "Unexpected error"
     },
     "step": {

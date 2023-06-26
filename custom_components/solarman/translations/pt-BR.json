@@ -6,6 +6,7 @@
     "error": {
       "cannot_connect": "Falhou ao conectar",
       "invalid_host": "Nome de host ou endereço IP inválido",
+      "no_yaml": "Nenhum arquivo de definição do inversor encontrado",
       "unknown": "Erro inesperado"
     },
     "step": {

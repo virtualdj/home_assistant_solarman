@@ -6,6 +6,7 @@
     "error": {
       "cannot_connect": "Verbindung fehlgeschlagen",
       "invalid_host": "Ungültiger Hostname oder ungültige IP-Adresse",
+      "no_yaml": "Keine Wechselrichter-Definitionsdateien gefunden",
       "unknown": "Unerwarteter Fehler"
     },
     "step": {

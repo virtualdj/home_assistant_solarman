@@ -28,7 +28,7 @@ class Inverter:
         self.status_lastUpdate = "N/A"
         self.lookup_file = lookup_file
         if not self.lookup_file or lookup_file == 'parameters.yaml':
-            self.lookup_file = 'deye_hybrid.yaml'
+            self.lookup_file = DEFAULT_LOOKUP_FILE
 
         with open(self.path + self.lookup_file) as f:
             self.parameter_definition = yaml.full_load(f)

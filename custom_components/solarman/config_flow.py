@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 from socket import getaddrinfo, herror, gaierror, timeout
+import os
 
 import voluptuous as vol
 from voluptuous.schema_builder import Schema
@@ -20,8 +21,15 @@ from .const import *
 
 _LOGGER = logging.getLogger(__name__)
 
+def load_yamls(hass) -> list:
+    _LOGGER.debug('config_flow.py:load_yamls')
+    lookup_dir = os.path.join(hass.config.path(), LOOKUP_PATH)
+    if os.path.exists(lookup_dir):
+        return sorted([f for f in os.listdir(lookup_dir) if f.endswith('.yaml')])
+    return [] 
 
-def step_user_data_schema(data: dict[str, Any] = {CONF_NAME: SENSOR_PREFIX, CONF_INVERTER_PORT: DEFAULT_PORT_INVERTER, CONF_INVERTER_MB_SLAVEID: DEFAULT_INVERTER_MB_SLAVEID, CONF_LOOKUP_FILE: DEFAULT_LOOKUP_FILE}) -> Schema:
+
+def step_user_data_schema(lookup_files: list, data: dict[str, Any] = {CONF_NAME: SENSOR_PREFIX, CONF_INVERTER_PORT: DEFAULT_PORT_INVERTER, CONF_INVERTER_MB_SLAVEID: DEFAULT_INVERTER_MB_SLAVEID, CONF_LOOKUP_FILE: DEFAULT_LOOKUP_FILE}) -> Schema:
     _LOGGER.debug(f'config_flow.py:step_user_data_schema: {data}')
     STEP_USER_DATA_SCHEMA = vol.Schema(
         {
@@ -30,7 +38,7 @@ def step_user_data_schema(data: dict[str, Any] = {CONF_NAME: SENSOR_PREFIX, CONF
             vol.Required(CONF_INVERTER_SERIAL, default=data.get(CONF_INVERTER_SERIAL)): int,
             vol.Optional(CONF_INVERTER_PORT, default=data.get(CONF_INVERTER_PORT)): int,
             vol.Optional(CONF_INVERTER_MB_SLAVEID, default=data.get(CONF_INVERTER_MB_SLAVEID)): int,
-            vol.Optional(CONF_LOOKUP_FILE, default=data.get(CONF_LOOKUP_FILE)): vol.In(LOOKUP_FILES),
+            vol.Optional(CONF_LOOKUP_FILE, default=data.get(CONF_LOOKUP_FILE)): vol.In(lookup_files),
         },
         extra=vol.PREVENT_EXTRA
     )
@@ -79,12 +87,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         _LOGGER.debug(f'config_flow.py:ConfigFlow.async_step_user: {user_input}')
         """Handle the initial step."""
-        if user_input is None:
+        errors = {}
+        yamls = await self.hass.async_add_executor_job(load_yamls, self.hass)
+        if not yamls:
+            errors["base"] = "no_yaml"
             return self.async_show_form(
-                step_id="user", data_schema=step_user_data_schema()
+                step_id="user",
+                errors=errors,
             )
 
-        errors = {}
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user", data_schema=step_user_data_schema(lookup_files=yamls)
+            )
 
         try:
             info = await validate_input(self.hass, user_input)
@@ -104,10 +119,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         _LOGGER.debug(f'config_flow.py:ConfigFlow.async_step_user: validation failed: {user_input}')
-
+            
         return self.async_show_form(
             step_id="user",
-            data_schema=step_user_data_schema(user_input),
+            data_schema=step_user_data_schema(lookup_files=yamls, data=user_input),
             errors=errors,
         )
 
@@ -125,13 +140,20 @@ class OptionsFlow(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Manage the options."""
         _LOGGER.debug(f'config_flow.py:OptionsFlow.async_step_init: {user_input}')
+        errors = {}
+        yamls = await self.hass.async_add_executor_job(load_yamls, self.hass)
+        if not yamls:
+            errors["base"] = "no_yaml"
+            return self.async_show_form(
+                step_id="init",
+                errors=errors,
+            )
+        
         if user_input is None:
             return self.async_show_form(
                 step_id="init",
-                data_schema=step_user_data_schema(self.entry.options),
+                data_schema=step_user_data_schema(lookup_files=yamls, data=self.entry.options),
             )
-
-        errors = {}
 
         try:
             info = await validate_input(self.hass, user_input)

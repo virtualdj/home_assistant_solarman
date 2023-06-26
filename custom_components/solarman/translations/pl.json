@@ -6,6 +6,7 @@
     "error": {
       "cannot_connect": "Nie uda\u0142o si\u0119 po\u0142\u0105czy\u0107",
       "invalid_host": "Nieprawid\u0142owa nazwa hosta lub adres IP",
+      "no_yaml": "Nie znaleziono plików definicji falownika",
       "unknown": "Niespodziewany b\u0142\u0105d"
     },
     "step": {
