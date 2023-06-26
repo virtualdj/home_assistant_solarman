@@ -19,6 +19,7 @@ LOOKUP_FILES = [
     'sofar_g3hyd.yaml',
     'sofar_hyd3k-6k-es.yaml',
     'zcs_azzurro-ktl-v3.yaml',
+    'zcs_azzurro_hyd5000.yaml',
     'custom_parameters.yaml'
 ]
 

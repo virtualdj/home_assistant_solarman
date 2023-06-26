@@ -1,5 +1,4 @@
-# Configuration file for Sofar HYD3000/4000/5000/6000-ES
-# inverter family.
+# Configuration file for Sofar/ZCS HYD5000
 
 requests:
   - start: 0x0200
@@ -8,6 +7,9 @@ requests:
   - start: 0x10B0
     end: 0x10BC
     mb_functioncode: 0x04
+  - start: 0x6005
+    end:  0x6005
+    mb_functioncode: 0x50
 
 
 parameters:
@@ -461,14 +463,10 @@ parameters:
       -  key: 2
          value: "Normal"
       -  key: 3
-         value: "Discharging Check State"
-      -  key: 4
-         value: "Discharging State"
-      -  key: 5
          value: "EPS State"
-      -  key: 6
+      -  key: 4
          value: "Fault State"
-      -  key: 7
+      -  key: 5
          value: "Permanent State"
       icon: 'mdi:state-machine'
 
@@ -646,156 +644,29 @@ parameters:
       class: ""
       state_class: ""
       uom: ""
+      rule: 9
+      registers: [0x6005]
+      isstr: true
+
+    - name: "Inverter alarm"
+      class: ""
+      state_class: ""
+      uom: ""
       scale: 1
       rule: 1
-      registers: [0x022B]
+      registers: [0x0201,0x0202,0x0203,0x0204,0x0205]
       isstr: true
       lookup:
       -  key: 0
          value: "No error"
-      -  key: 1
-         value: "ID01 The power grid voltage is too high"
-      -  key: 2
-         value: "ID02 The power grid voltage is too low"
-      -  key: 3
-         value: "ID03 The power grid frequency is too high"
-      -  key: 4
-         value: "ID04 The power grid frequency is too low"
-      -  key: 5
-         value: "ID05 The battery voltage is too high"
-      -  key: 7
-         value: "ID07 GridLVRT fault"
-      -  key: 8
-         value: "ID08 The PV voltage is too high"
-      -  key: 9
-         value: "ID09 LLCBus voltage is too high and has triggered hardware protection"
-      -  key: 10
-         value: "ID10 Boost voltage is too high and has triggered hardware protection"
-      -  key: 11
-         value: "ID11 BuckBoost current is too high and has triggered hardware protection"
-      -  key: 12
-         value: "ID12 The battery current is too high and has triggered hardware protection"
-      -  key: 13
-         value: "ID13 The GFCI sampling value between the master DSP and slave DSP is not consistent"
-      -  key: 14
-         value: "ID14 The PV current is too high and has triggered hardware protection"
-      -  key: 15
-         value: "ID15 The grid current is too high and has triggered hardware protection"
-      -  key: 16
-         value: "ID16 Input current is not balanced"
-      -  key: 17
-         value: "ID17 Grid current sampling error"
-      -  key: 18
-         value: "ID18 DCI sampling error"
-      -  key: 19
-         value: "ID19 Grid voltage sampling error"
-      -  key: 20
-         value: "ID20 GFCI sampling error"
-      -  key: 21
-         value: "ID21 Master chip fault"
-      -  key: 22
-         value: "ID22 Auxiliary voltage error"
-      -  key: 25
-         value: "ID25 LLCBus voltage is too high"
-      -  key: 26
-         value: "ID26 Bus voltage is too high and has triggered software protection"
-      -  key: 27
-         value: "ID27 Battery current is too high"
-      -  key: 28
-         value: "ID28 The DCI is too high"
-      -  key: 29
-         value: "ID29 The grid current is too high"
-      -  key: 30
-         value: "ID30 Bunk current is too high"
-      -  key: 31
-         value: "ID31 The output current is too high"
-      -  key: 32
-         value: "ID32 The input current is too high"
-      -  key: 33
-         value: "ID33 Incorrect input mode"
-      -  key: 48
-         value: "ID48 The GFCI sampling value between the master DSP and slave DSP is not consistent"
-      -  key: 49
-         value: "ID49 The grid voltage sampling value between the master DSP and slave DSP is no consistent"
-      -  key: 50
-         value: "ID50 The grid frequency sampling value between the master DSP and slave DSP is no consistent"
-      -  key: 51
-         value: "ID51 The DCI sampling value between the master DSP and slave DSP is no consistent"
-      -  key: 52
-         value: "ID52 HYD-ES inverter can't communicate with Lithium battery BMS correctly"
-      -  key: 53
-         value: "ID53 SPI communication fault"
-      -  key: 54
-         value: "ID54 SCI communication fault"
-      -  key: 55
-         value: "ID55 Relays fault"
-      -  key: 56
-         value: "ID56 Insulation resistance is too low"
-      -  key: 57
-         value: "ID57 Battery temperature is too high"
-      -  key: 58
-         value: "ID58 Heat sink temperature is too high"
-      -  key: 59
-         value: "ID59 Environment temperature is too high"
-      -  key: 60
-         value: "ID60 PE connectFault"
-      -  key: 65
-         value: "ID65 The grid current is too high and has caused unrecoverable hardware fault"
-      -  key: 66
-         value: "ID66 The bus voltage is too high and has caused unrecoverable fault"
-      -  key: 67
-         value: "ID67 Unrecoverable fault of battery overcurrent in EPS mode"
-      -  key: 68
-         value: "ID68 The input current is unbalanced and has triggered an unrecoverable fault"
-      -  key: 70
-         value: "ID70 The grid current is too high and has triggered an unrecoverable fault"
-      -  key: 73
-         value: "ID73 The input current is too high and has triggered an unrecoverable fault"
-      -  key: 74
-         value: "ID74 Incorrect input mode"
-      -  key: 75
-         value: "ID75 Unrecoverable EEPROM write"
-      -  key: 76
-         value: "ID76 Unrecoverable EEPROM read"
-      -  key: 77
-         value: "ID77 Relay has triggered permanent fault"
-      -  key: 81
-         value: "ID81 Internal temperature is too high"
-      -  key: 82
-         value: "ID82 AC frequency is too high"
-      -  key: 83
-         value: "ID83 Remote power derate"
-      -  key: 84
-         value: "ID84 Switch OFF HYD series inverter remotely"
-      -  key: 85
-         value: "ID85 SOC <= 1 - DOD or Low battery voltage"
-      -  key: 86
-         value: "ID86 Battery voltage is too low and caused HYD series inverter to switch OFF"
-      -  key: 94
-         value: "ID94 Software version is not consistent"
-      -  key: 95
-         value: "ID95 The communication board EEPROM is faulty"
-      -  key: 96
-         value: "ID96 RTC clock chip fault"
-      -  key: 98
-         value: "ID98 SD card fault"
-      -  key: 100
-         value: "ID100 Battery overcurrent discharging protection"
-      -  key: 101
-         value: "ID101 Discharging short circuit protection"
-      -  key: 102
-         value: "ID102 Battery high voltage protection"
-      -  key: 103
-         value: "ID103 Battery low voltage protection"
-      -  key: 104
-         value: "ID104 Battery high temperature protection while discharging"
-      -  key: 105
-         value: "ID105 Battery high temperature protection while charging"
-      -  key: 106
-         value: "ID106 Battery low temperature protection while discharging"
-      -  key: 107
-         value: "ID107 Battery low temperature protection while charging"
-      icon: 'mdi:alert'
+      -  key: 0x2
+         value: "ID02 Grid Under Voltage Protection"
+      -  key: 0x8
+         value: "ID04 Grid Under Frequency Protection"
+      -  key: 0x800
+         value: "ID12 Battery Over Current Hardware"
+      -  key: 0x2000000
+         value: "ID26 Bus over voltage protection"
 
     - name: "Fault 1"
       class: ""
@@ -821,25 +692,25 @@ parameters:
       -  key: 32
          value: "ID06"
       -  key: 64
-         value: "ID07"
+         value: "ID07 LVRT fault"
       -  key: 128
-         value: "ID08"
+         value: "ID08 PV Over Voltage"
       -  key: 256
          value: "ID09 LLCBus Over Voltage Hardware"
       -  key: 512
          value: "ID10 Bus Over Voltage Hardware"
       -  key: 1024
-         value: "ID11 BuckBoost over Current Hardware"
+         value: "ID11 BuckBoost Over Current Hardware"
       -  key: 2048
-         value: "ID12 Battery over Current Hardware"
+         value: "ID12 Battery Over Current Hardware"
       -  key: 4096
-         value: "ID13"
+         value: "ID13 Residual Current Fault"
       -  key: 8192
-         value: "ID14"
+         value: "ID14 PV Hardware Over Current"
       -  key: 16384
-         value: "ID15 Output Current Hardware"
+         value: "ID15 AC Output Over Current Hardware"
       -  key: 32768
-         value: "ID16"
+         value: "ID16 PV Current Unbalanced"
       icon: 'mdi:wrench'
 
 

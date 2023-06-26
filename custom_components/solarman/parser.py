@@ -39,6 +39,8 @@ class ParameterParser:
             self.try_parse_version(rawData,definition, start, length)
         elif rule == 8:
             self.try_parse_datetime(rawData,definition, start, length)
+        elif rule == 9:
+            self.try_parse_dp(rawData,definition, start, length)
         return
     
     def do_validate(self, title, value, rule):
@@ -94,6 +96,13 @@ class ParameterParser:
 
         return
     
+    def try_parse_dp(self, rawData, definition, start, length):
+        title = definition['name']
+        temp = rawData[OFFSET_PARAMS:OFFSET_PARAMS+8]
+        if temp[0] > 0:
+            self.result[title] = f'ID{temp[0]:02d}\t20{temp[1]:02x}-{temp[2]:02x}-{temp[3]:02x}\t{temp[5]:02x}:{temp[6]:02x}'   
+        return
+
     def try_parse_unsigned (self, rawData, definition, start, length):
         title = definition['name']
         scale = definition['scale']
