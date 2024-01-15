@@ -116,4 +116,5 @@ Example yaml file for the example mentioned above:
 |    7   | Version               |                                                                                                                        |
 |    8   | Date Time             |                                                                                                                        |
 |    9   | Time                  | Time value as string<ul><li>Example 1: Register Value 2200 => Time Value: 22:00</li><li>Example 2: Register value: 400 => 04:00</li></ul> |
+|    10  | Sofar Event ID        | 4 registers with event ID number, last 2 year digits, month, day, hour, minute, second                                 |
 

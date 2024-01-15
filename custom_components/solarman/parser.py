@@ -16,26 +16,28 @@ class ParameterParser:
         return self.result
 
 
-    def try_parse_field (self, rawData, definition, start, length):
+    def try_parse_field(self, rawData, definition, start, length):
         rule = definition['rule']
         if rule == 1:
-            self.try_parse_unsigned(rawData,definition, start, length)
+            self.try_parse_unsigned(rawData, definition, start, length)
         elif rule == 2:
-            self.try_parse_signed(rawData,definition, start, length)
+            self.try_parse_signed(rawData, definition, start, length)
         elif rule == 3:
-            self.try_parse_unsigned(rawData,definition, start, length)
+            self.try_parse_unsigned(rawData, definition, start, length)
         elif rule == 4:
-            self.try_parse_signed(rawData,definition, start, length)
+            self.try_parse_signed(rawData, definition, start, length)
         elif rule == 5:
-            self.try_parse_ascii(rawData,definition, start, length)
+            self.try_parse_ascii(rawData, definition, start, length)
         elif rule == 6:
-            self.try_parse_bits(rawData,definition, start, length)
+            self.try_parse_bits(rawData, definition, start, length)
         elif rule == 7:
-            self.try_parse_version(rawData,definition, start, length)
+            self.try_parse_version(rawData, definition, start, length)
         elif rule == 8:
-            self.try_parse_datetime(rawData,definition, start, length)
+            self.try_parse_datetime(rawData, definition, start, length)
         elif rule == 9:
-            self.try_parse_time(rawData,definition, start, length)
+            self.try_parse_time(rawData, definition, start, length)
+        elif rule == 10:
+            self.try_parse_sofar_event_id(rawData, definition, start, length)
         return
     
     def do_validate(self, title, value, rule):
@@ -53,7 +55,7 @@ class ParameterParser:
         
         return True
 
-    def try_parse_signed (self, rawData, definition, start, length):
+    def try_parse_signed(self, rawData, definition, start, length):
         title = definition['name']
         scale = definition['scale']
         value = 0
@@ -90,7 +92,7 @@ class ParameterParser:
 
         return
     
-    def try_parse_unsigned (self, rawData, definition, start, length):
+    def try_parse_unsigned(self, rawData, definition, start, length):
         title = definition['name']
         scale = definition['scale']
         value = 0
@@ -128,14 +130,14 @@ class ParameterParser:
         return
 
 
-    def lookup_value (self, value, options):
+    def lookup_value(self, value, options):
         for o in options:
             if (o['key'] == value):
                 return o['value']
         return value
 
 
-    def try_parse_ascii (self, rawData, definition, start, length):
+    def try_parse_ascii(self, rawData, definition, start, length):
         title = definition['name']         
         found = True
         value = ''
@@ -151,7 +153,7 @@ class ParameterParser:
             self.result[title] = value
         return  
     
-    def try_parse_bits (self, rawData, definition, start, length):
+    def try_parse_bits(self, rawData, definition, start, length):
         title = definition['name']         
         found = True
         value = []
@@ -167,7 +169,7 @@ class ParameterParser:
             self.result[title] = value
         return 
     
-    def try_parse_version (self, rawData, definition, start, length):
+    def try_parse_version(self, rawData, definition, start, length):
         title = definition['name']         
         found = True
         value = ''
@@ -183,7 +185,7 @@ class ParameterParser:
             self.result[title] = value
         return
 
-    def try_parse_datetime (self, rawData, definition, start, length):
+    def try_parse_datetime(self, rawData, definition, start, length):
         title = definition['name']         
         found = True
         value = ''
@@ -193,11 +195,11 @@ class ParameterParser:
             print ("index: ",index)
             if (index >= 0) and (index < length):
                 temp = rawData[index]
-                if(i==0):
+                if (i==0):
                     value = value + str(temp >> 8)  + "/" + str(temp & 0xFF) + "/"
                 elif (i==1):
                     value = value + str(temp >> 8)  + " " + str(temp & 0xFF) + ":"
-                elif(i==2):
+                elif (i==2):
                     value = value + str(temp >> 8)  + ":" + str(temp & 0xFF)
                 else:
                     value = value + str(temp >> 8)  + str(temp & 0xFF)
@@ -208,7 +210,7 @@ class ParameterParser:
             self.result[title] = value
         return
 
-    def try_parse_time (self, rawData, definition, start, length):
+    def try_parse_time(self, rawData, definition, start, length):
         title = definition['name']         
         found = True
         value = ''
@@ -223,8 +225,33 @@ class ParameterParser:
         if found:
             self.result[title] = value
         return
- 
-    def get_sensors (self):
+
+    def try_parse_sofar_event_id(self, rawData, definition, start, length):
+        title = definition['name']         
+        found = True
+        value = ''
+        for i,r in enumerate(definition['registers']):
+            index = r - start   # get the decimal value of the register'
+            if (index >= 0) and (index < length):
+                temp = rawData[index]
+                if (i==0):
+                    value = value + "ID" + str(temp)
+                elif (i==1):
+                    value = value + "\t(20" + "{:02d}".format(temp >> 8)  + "-" + "{:02d}".format(temp & 0xFF)
+                elif (i==2):
+                    value = value + "-" + "{:02d}".format(temp >> 8)  + " " + "{:02d}".format(temp & 0xFF)
+                elif (i==3):
+                    value = value + ":" + "{:02d}".format(temp >> 8)  + ":" + "{:02d}".format(temp & 0xFF) + ")"
+                else:
+                    found = False
+            else:
+                found = False
+
+        if found:
+            self.result[title] = value
+        return 
+
+    def get_sensors(self):
         result = []
         for i in self._lookups['parameters']:
             for j in i['items']:
