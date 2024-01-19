@@ -670,6 +670,7 @@ parameters:
       scale: 1
       rule: 10
       registers: [0x1480,0x1481,0x1482,0x1483]
+      isstr: true
 
 #    - name: "Inverter alarm"
 #      class: ""
