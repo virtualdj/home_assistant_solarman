@@ -3,7 +3,7 @@ import yaml
 import logging
 import struct
 from homeassistant.util import Throttle
-from datetime import datetime
+import homeassistant.util.dt as dt_util
 from .parser import ParameterParser
 from .const import *
 from pysolarmanv5 import PySolarmanV5
@@ -99,7 +99,7 @@ class Inverter:
 
             if result == 1:
                 log.debug(f"All queries succeeded, exposing updated values.")
-                self.status_lastUpdate = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                self.status_lastUpdate = dt_util.now().strftime("%Y-%m-%d %H:%M:%S")
                 self.status_connection = "Connected"
                 self._current_val = params.get_result()
             else:
