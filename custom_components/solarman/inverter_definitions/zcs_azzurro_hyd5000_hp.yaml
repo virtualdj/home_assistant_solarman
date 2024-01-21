@@ -33,10 +33,13 @@ requests:
 
   # Battery input
   - start: 0x0604
-    end: 0x0611
+    end: 0x060A
     mb_functioncode: 0x03
   - start: 0x0667
     end: 0x0669
+    mb_functioncode: 0x03
+  - start: 0x104D
+    end: 0x104D
     mb_functioncode: 0x03
 
   # Power counters
@@ -135,14 +138,14 @@ parameters:
       icon: 'mdi:solar-power'
 
     - name: "Total Generation Time"
+      # In minutes, converted to hours
       class: ""
       state_class: "measurement"
-      uom: "min"
-      scale: 1
+      uom: "h"
+      scale_division: 60
       rule: 3
       registers: [0x0428,0x0427]
       icon: 'mdi:clock-outline'
-      # TODO: Convert to hours?
 
     - name: "Today Generation Time"
       class: ""
@@ -152,6 +155,53 @@ parameters:
       rule: 1
       registers: [0x0426]
       icon: 'mdi:clock-outline'
+
+ - group: output
+   items:
+    - name: "Power Consumption"
+      class: "power"
+      state_class: "measurement"
+      uom: "kW"
+      scale: 0.01
+      rule: 1
+      registers: [0x04AF]
+      icon: 'mdi:home-lightning-bolt'
+
+    - name: "Feed in / out power"
+      class: "power"
+      state_class: "measurement"
+      uom: "kW"
+      scale: 0.01
+      rule: 2
+      registers: [0x0488]
+      icon: 'mdi:lightning-bolt'
+
+    - name: "Grid Frequency"
+      class: "frequency"
+      state_class: "measurement"
+      uom: "Hz"
+      scale: 0.01
+      rule: 1
+      registers: [0x0484]
+      icon: 'mdi:home-lightning-bolt'
+
+    - name: "Grid Voltage"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x048D]
+      icon: 'mdi:home-lightning-bolt'
+
+    - name: "Grid Current"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.01
+      rule: 1
+      registers: [0x0492]
+      icon: 'mdi:home-lightning-bolt'
 
     - name: "Today Grid Return"
       class: "energy"
@@ -207,81 +257,16 @@ parameters:
       registers: [0x068B,0x068A]
       icon: 'mdi:lightning-bolt'
 
- - group: Output
+ - group: batteries
    items:
-    - name: "Power Consumption"
+    - name: "Charge / Discharge Power"
       class: "power"
       state_class: "measurement"
       uom: "kW"
-      scale: 0.01
-      rule: 1
-      registers: [0x04AF]
-      icon: 'mdi:home-lightning-bolt'
-
-#    - name: "Output active power"
-#      class: "power"
-#      state_class: "measurement"
-#      uom: "W"
-#      scale: 10
-#      rule: 1
-#      registers: [0x000C] # Old
-#      icon: 'mdi:home-lightning-bolt'
-
-#    - name: "Output reactive power"
-#      class: ""
-#      state_class: "measurement"
-#      uom: "kVar"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x000D] # Old
-#      icon: 'mdi:home-lightning-bolt'
-
-    - name: "Grid Frequency"
-      class: "frequency"
-      state_class: "measurement"
-      uom: "Hz"
-      scale: 0.01
-      rule: 1
-      registers: [0x0484]
-      icon: 'mdi:home-lightning-bolt'
-
-    - name: "Grid Voltage"
-      class: "voltage"
-      state_class: "measurement"
-      uom: "V"
       scale: 0.1
-      rule: 1
-      registers: [0x048D]
-      icon: 'mdi:home-lightning-bolt'
-
-    - name: "Grid Current"
-      class: "current"
-      state_class: "measurement"
-      uom: "A"
-      scale: 0.01
-      rule: 1
-      registers: [0x0492]
-      icon: 'mdi:home-lightning-bolt'
-
- - group: batteries
-   items:
-#    - name: "Battery Voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x020E]
-#      icon: 'mdi:battery-charging'
-
-#    - name: "Battery Charge / Discharge current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 2
-#      registers: [0x020F]
-#      icon: 'mdi:battery-charging-10'
+      rule: 2
+      registers: [0x0667]
+      icon: 'mdi:battery-charging-50'
 
     - name: "Battery Percentage"
       class: "battery"
@@ -292,14 +277,14 @@ parameters:
       registers: [0x0668]
       icon: 'mdi:battery'
 
-#    - name: "Battery Temperature"
-#      class: "temperature"
-#      state_class: "measurement"
-#      uom: "°C"
-#      scale: 1
-#      rule: 1
-#      registers: [0x0211]
-#      icon: 'mdi:battery-heart-outline'
+    - name: "Battery Health"
+      class: ""
+      state_class: "measurement"
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x0669]
+      icon: 'mdi:battery-heart-outline'
 
     - name: "Battery Daily Charge"
       class: "energy"
@@ -333,137 +318,151 @@ parameters:
       state_class: "total"
       uom: "kWh"
       scale: 0.1
-      rule: 3
+      rule: 2
       registers: [0x069B,0x069A]
       icon: 'mdi:battery-clock-outline'
 
-#    - name: "Battery Cicles"
+    - name: "Battery Discharge Depth"
+      class: ""
+      state_class: "measurement"
+      uom: "%"
+      scale: 1
+      rule: 1
+      registers: [0x104D]
+      icon: 'mdi:battery-remove-outline'
+
+    # Battery Pack 1 ------------------------------------
+
+#    - name: "Battery Pack 1 Percentage"
 #      class: ""
-#      state_class: ""
-#      uom: "Charges"
+#      state_class: "measurement"
+#      uom: "%"
 #      scale: 1
 #      rule: 1
-#      registers: [0x022C]
-#      icon: 'mdi:battery-check-outline'
+#      registers: [0x0608]
+#      icon: 'mdi:battery'
 #
-#    - name: "Battery Power"
+#    - name: "Battery Pack 1 Health"
+#      class: ""
+#      state_class: "measurement"
+#      uom: "%"
+#      scale: 1
+#      rule: 1
+#      registers: [0x0609]
+#      icon: 'mdi:battery-heart-outline'
+
+    - name: "Battery Pack 1 Cycles"
+      class: ""
+      state_class: "measurement"
+      uom: "cycles"
+      scale: 1
+      rule: 1
+      registers: [0x060A]
+      icon: 'mdi:battery-check-outline'
+
+#    - name: "Battery Pack 1 Power"
 #      class: "power"
 #      state_class: "measurement"
 #      uom: "kW"
 #      scale: 0.01
 #      rule: 2
-#      registers: [0x0237]
+#      registers: [0x0606]
 #      icon: 'mdi:battery-charging-high'
+
+    - name: "Battery Pack 1 Voltage"
+      class: "voltage"
+      state_class: "measurement"
+      uom: "V"
+      scale: 0.1
+      rule: 1
+      registers: [0x0604]
+      icon: 'mdi:battery'
+
+    - name: "Battery Pack 1 Current"
+      class: "current"
+      state_class: "measurement"
+      uom: "A"
+      scale: 0.01
+      rule: 2
+      registers: [0x0605]
+      icon: 'mdi:battery'
+
+    - name: "Battery Pack 1 Temperature"
+      class: "temperature"
+      state_class: "measurement"
+      uom: "°C"
+      scale: 1
+      rule: 2
+      registers: [0x0607]
+      icon: 'mdi:battery'
+
+#    # Battery Pack 2 ------------------------------------
 #
-#    - name: "Battery Type"
+#    - name: "Battery Pack 2 Percentage"
 #      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x10B0]
-#      icon: 'mdi:battery'
-#
-#    - name: "Battery Capacity"
-#      class: ""
-#      state_class: ""
-#      uom: "Ah"
-#      scale: 1
-#      rule: 1
-#      registers: [0x10B1]
-#      icon: 'mdi:battery'
-#
-#    - name: "Max Charge Voltage"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x10B3]
-#      icon: 'mdi:battery'
-#
-#    - name: "Max Charge Current"
-#      class: ""
-#      state_class: ""
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x10B4]
-#      icon: 'mdi:battery'
-#
-#    - name: "Over Voltage Protection"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x10B5]
-#      icon: 'mdi:battery'
-#
-#    - name: "Min Discharge Voltage"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x10B6]
-#      icon: 'mdi:battery'
-#
-#    - name: "Max Discharge Current"
-#      class: ""
-#      state_class: ""
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x10B7]
-#      icon: 'mdi:battery'
-#
-#    - name: "Undervoltage Protection"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x10B8]
-#      icon: 'mdi:battery'
-#
-#    - name: "Discharge Depth"
-#      class: ""
-#      state_class: ""
+#      state_class: "measurement"
 #      uom: "%"
 #      scale: 1
 #      rule: 1
-#      registers: [0x10B9]
+#      registers: [0x060F]
 #      icon: 'mdi:battery'
 #
-#    - name: "Periods Of Discharge Time"
+#    - name: "Battery Pack 2 Health"
 #      class: ""
-#      state_class: ""
-#      uom: "h"
+#      state_class: "measurement"
+#      uom: "%"
 #      scale: 1
 #      rule: 1
-#      registers: [0x10BA]
+#      registers: [0x0610]
+#      icon: 'mdi:battery-heart-outline'
+#
+#    - name: "Battery Pack 2 Cycles"
+#      class: ""
+#      state_class: "measurement"
+#      uom: "cycles"
+#      scale: 1
+#      rule: 1
+#      registers: [0x0611]
+#      icon: 'mdi:battery-check-outline'
+#
+#    - name: "Battery Pack 2 Power"
+#      class: "power"
+#      state_class: "measurement"
+#      uom: "kW"
+#      scale: 0.01
+#      rule: 2
+#      registers: [0x060D]
+#      icon: 'mdi:battery-charging-high'
+#
+#    - name: "Battery Pack 2 Voltage"
+#      class: "voltage"
+#      state_class: "measurement"
+#      uom: "V"
+#      scale: 0.1
+#      rule: 1
+#      registers: [0x060B]
 #      icon: 'mdi:battery'
 #
-#    - name: "Empty Battery Voltage"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
+#    - name: "Battery Pack 2 Current"
+#      class: "current"
+#      state_class: "measurement"
+#      uom: "A"
 #      scale: 0.01
-#      rule: 1
-#      registers: [0x10BB]
+#      rule: 2
+#      registers: [0x060C]
 #      icon: 'mdi:battery'
 #
-#    - name: "Full Battery Voltage"
-#      class: ""
-#      state_class: ""
-#      uom: "V"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x10BC]
+#    - name: "Battery Pack 2 Temperature"
+#      class: "temperature"
+#      state_class: "measurement"
+#      uom: "°C"
+#      scale: 1
+#      rule: 2
+#      registers: [0x060E]
 #      icon: 'mdi:battery'
 
- - group: Inverter
+
+ - group: inverter
    items:
     - name: "Inverter status"
       class: ""
@@ -510,32 +509,14 @@ parameters:
       registers: [0x041A]
       icon: 'mdi:thermometer'
 
-#    - name: "Inverter bus voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 2
-#      registers: [0x022D]
-#      icon: 'mdi:home-lightning-bolt'
-#
-#    - name: "PV1 voltage sample by slave CPU"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x001E]
-#      icon: 'mdi:home-lightning-bolt'
-#
-#    - name: "PV1 current sample by slave CPU"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x001F]
-#      icon: 'mdi:home-lightning-bolt'
+    - name: "Insulation resistance"
+      class: ""
+      state_class: "measurement"
+      uom: "kΩ"
+      scale: 1
+      rule: 1
+      registers: [0x042B]
+      icon: 'mdi:omega'
 
     - name: "Countdown time"
       class: ""
@@ -546,122 +527,18 @@ parameters:
       registers: [0x0417]
       icon: 'mdi:clock'
 
-#    - name: "Input mode"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0022]
-#      icon: ''
-#
-#    - name: "Communication Board inner message"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0242]
-#      icon: ''
-#
-#    - name: "Insulation of PV1+ to ground"
-#      class: ""
-#      state_class: "measurement"
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0246]
-#      icon: ''
-#
-#    - name: "Insulation of PV2+ to ground"
-#      class: ""
-#      state_class: "measurement"
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0247]
-#      icon: ''
-#
-#    - name: "Insulation of PV- to ground"
-#      class: ""
-#      state_class: "measurement"
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0248]
-#      icon: ''
-#
-#    - name: "Country"
-#      class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x023A]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "Germany"
-#      -  key: 1
-#         value: "CEI0-21 Internal"
-#      -  key: 2
-#         value: "Australia"
-#      -  key: 3
-#         value: "Spain RD1699"
-#      -  key: 4
-#         value: "Turkey"
-#      -  key: 5
-#         value: "Denmark"
-#      -  key: 6
-#         value: "Greece"
-#      -  key: 7
-#         value: "Netherland"
-#      -  key: 8
-#         value: "Belgium"
-#      -  key: 9
-#         value: "UK-G59"
-#      -  key: 10
-#         value: "China"
-#      -  key: 11
-#         value: "France"
-#      -  key: 12
-#         value: "Poland"
-#      -  key: 13
-#         value: "Germany BDEW"
-#      -  key: 14
-#         value: "Germany VDE0126"
-#      -  key: 15
-#         value: "Italy CEI0-16"
-#      -  key: 16
-#         value: "UK-G83"
-#      -  key: 17
-#         value: "Greece Islands"
-#      -  key: 18
-#         value: "EU EN50438"
-#      -  key: 19
-#         value: "EU EN61727"
-#      -  key: 20
-#         value: "Korea"
-#      -  key: 21
-#         value: "Sweden"
-#      -  key: 22
-#         value: "Europe General"
-#      -  key: 23
-#         value: "CEI0-21 External"
-#      -  key: 24
-#         value: "Cyprus"
-#      -  key: 25
-#         value: "India"
-#      -  key: 26
-#         value: "Philippines"
-#      -  key: 27
-#         value: "New Zeland"
-#      -  key: 28
-#         value: "Reserve"
-#      -  key: 29
-#         value: "Reserve"
-#      icon: ''
+    - name: "Total Service Time"
+      # In minutes, converted to days
+      class: ""
+      state_class: "measurement"
+      uom: "d"
+      scale_division: 1440
+      rule: 3
+      registers: [0x042A,0x0429]
+      icon: 'mdi:clock-outline'
 
- - group: Alert
+
+ - group: alert
    items:
     - name: "Inverter last event"
       class: ""
@@ -672,379 +549,428 @@ parameters:
       registers: [0x1480,0x1481,0x1482,0x1483]
       isstr: true
 
-#    - name: "Inverter alarm"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0201,0x0202,0x0203,0x0204,0x0205]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 0x2
-#         value: "ID02 Grid Under Voltage Protection"
-#      -  key: 0x8
-#         value: "ID04 Grid Under Frequency Protection"
-#      -  key: 0x800
-#         value: "ID12 Battery Over Current Hardware"
-#      -  key: 0x2000000
-#         value: "ID26 Bus over voltage protection"
-#
-#    - name: "Fault 1"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0201]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 1
-#         value: "ID01 Grid Over Voltage Protection"
-#      -  key: 2
-#         value: "ID02 Grid Under Voltage Protection"
-#      -  key: 4
-#         value: "ID03 Grid Over Frequency Protection"
-#      -  key: 8
-#         value: "ID04 Grid Under Frequency Protection"
-#      -  key: 16
-#         value: "ID05 Battery Over Voltage"
-#      -  key: 32
-#         value: "ID06"
-#      -  key: 64
-#         value: "ID07 LVRT fault"
-#      -  key: 128
-#         value: "ID08 PV Over Voltage"
-#      -  key: 256
-#         value: "ID09 LLCBus Over Voltage Hardware"
-#      -  key: 512
-#         value: "ID10 Bus Over Voltage Hardware"
-#      -  key: 1024
-#         value: "ID11 BuckBoost Over Current Hardware"
-#      -  key: 2048
-#         value: "ID12 Battery Over Current Hardware"
-#      -  key: 4096
-#         value: "ID13 Residual Current Fault"
-#      -  key: 8192
-#         value: "ID14 PV Hardware Over Current"
-#      -  key: 16384
-#         value: "ID15 AC Output Over Current Hardware"
-#      -  key: 32768
-#         value: "ID16 PV Current Unbalanced"
-#      icon: 'mdi:wrench'
-#
-#
-#    - name: "Fault 2"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0202]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 1
-#         value: "ID17 Grid current sampling error"
-#      -  key: 2
-#         value: "ID18 DCI sampling error"
-#      -  key: 4
-#         value: "ID19 Grid voltage sampling error"
-#      -  key: 8
-#         value: "ID20"
-#      -  key: 16
-#         value: "ID21 Main chip fault"
-#      -  key: 32
-#         value: "ID22 Hardware auxiliary power fault"
-#      -  key: 64
-#         value: "ID23"
-#      -  key: 128
-#         value: "ID24"
-#      -  key: 256
-#         value: "ID25 LLCBus Over Current protection"
-#      -  key: 512
-#         value: "ID26 Bus over voltage protection"
-#      -  key: 1024
-#         value: "ID27 Battery Over Current protection"
-#      -  key: 2048
-#         value: "ID28 Dci Over Current Protection"
-#      -  key: 4096
-#         value: "ID29 Output over current software"
-#      -  key: 8192
-#         value: "ID30 Buck Over Current"
-#      -  key: 16384
-#         value: "ID31 Output over current protection"
-#      -  key: 32768
-#         value: "ID32 The input current is too high"
-#      icon: 'mdi:wrench'
-#
-#    - name: "Fault 3"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0203]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 1
-#         value: "ID33 Reserved"
-#      -  key: 2
-#         value: "ID34 Reserved"
-#      -  key: 4
-#         value: "ID35 Reserved"
-#      -  key: 8
-#         value: "ID36 Reserved"
-#      -  key: 16
-#         value: "ID37 Reserved"
-#      -  key: 32
-#         value: "ID38 Reserved"
-#      -  key: 64
-#         value: "ID39 Reserved"
-#      -  key: 128
-#         value: "ID40 Reserved"
-#      -  key: 256
-#         value: "ID41 Reserved"
-#      -  key: 512
-#         value: "ID42 Reserved"
-#      -  key: 1024
-#         value: "ID43 Reserved"
-#      -  key: 2048
-#         value: "ID44 Reserved"
-#      -  key: 4096
-#         value: "ID45 Reserved"
-#      -  key: 8192
-#         value: "ID46 Reserved"
-#      -  key: 16384
-#         value: "ID47 Reserved"
-#      -  key: 32768
-#         value: "ID48 Reserved"
-#      icon: 'mdi:wrench'
-#
-#    - name: "Fault 4"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0204]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 1
-#         value: "ID49 Grid voltage sampling value between master and slave DSP vary widely"
-#      -  key: 2
-#         value: "ID50 Grid frequency sampling value between master and slave DSP vary widely"
-#      -  key: 4
-#         value: "ID51 DCI sampling value between master and slave DSP vary widely"
-#      -  key: 8
-#         value: "ID52 GFCI sampling value between master and slave DSP vary widely"
-#      -  key: 16
-#         value: "ID53 Communication failure between master and slave DSP failure"
-#      -  key: 32
-#         value: "ID53 Communication failure between slave and communication board"
-#      -  key: 64
-#         value: "ID55 Relay fault"
-#      -  key: 128
-#         value: "ID56"
-#      -  key: 256
-#         value: "ID57 Inverter temp is too high"
-#      -  key: 512
-#         value: "ID58 Boost temp is too high"
-#      -  key: 1024
-#         value: "ID59 Environment temp is too high"
-#      -  key: 2048
-#         value: "ID60"
-#      -  key: 4096
-#         value: "ID61 Reserved"
-#      -  key: 8192
-#         value: "ID62 Reserved"
-#      -  key: 16384
-#         value: "ID63 Reserved"
-#      -  key: 32768
-#         value: "ID64 Reserved"
-#      icon: 'mdi:wrench'
-#
-#    - name: "Fault 5"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x0205]
-#      isstr: true
-#      lookup:
-#      -  key: 0
-#         value: "No error"
-#      -  key: 1
-#         value: "ID65 Grid current is too high and causes unrecoverable fault"
-#      -  key: 2
-#         value: "ID66 Bus voltage is too high and causes unrecoverable fault"
-#      -  key: 4
-#         value: "ID67 EPS Mode Battery Over current,and has cause unrecoverable fault"
-#      -  key: 8
-#         value: "ID68"
-#      -  key: 16
-#         value: "ID69"
-#      -  key: 32
-#         value: "ID70 The Output current is too high,and has cause unrecoverable fault"
-#      -  key: 64
-#         value: "ID71"
-#      -  key: 128
-#         value: "ID72 Reserved"
-#      -  key: 256
-#         value: "ID73 Reserved"
-#      -  key: 512
-#         value: "ID74"
-#      -  key: 1024
-#         value: "ID75 Error writing from EEPROM"
-#      -  key: 2048
-#         value: "ID76 Error reading to EEPROM"
-#      -  key: 4096
-#         value: "ID77 Relay fauilure causes unrecoverable fault"
-#      -  key: 8192
-#         value: "ID78 Reserved"
-#      -  key: 16384
-#         value: "ID79 Reserved"
-#      -  key: 32768
-#         value: "ID80 Reserved"
-#      icon: 'mdi:wrench'
+    - name: "Fault 01"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0405]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID01 Grid over-voltage protection"
+      -  key: 2
+         value: "ID02 Grid under-voltage protection"
+      -  key: 4
+         value: "ID03 Grid over-frequency protection"
+      -  key: 8
+         value: "ID04 Grid under-frequency protection"
+      -  key: 16
+         value: "ID05 Leakage current fault"
+      -  key: 32
+         value: "ID06 High penetration error"
+      -  key: 64
+         value: "ID07 Low penetration error"
+      -  key: 128
+         value: "ID08 Islanding error"
+      -  key: 256
+         value: "ID09 Grid transient over-voltage 1"
+      -  key: 512
+         value: "ID10 Grid transient over-voltage 2"
+      -  key: 1024
+         value: "ID11 Grid line voltage error"
+      -  key: 2048
+         value: "ID12 Inverter voltage error"
+      -  key: 4096
+         value: "ID13 Anti-backflow overload"
+      icon: 'mdi:wrench'
 
- - group: Other energy
-   items:
-#    - name: "Buck Current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x022F]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid R Voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x0230]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid R Current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x0231]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Generation Current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x0236]
-#      icon: 'mdi:lightning-bolt'
+    - name: "Fault 02"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0406]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID17 Grid current sampling error"
+      -  key: 2
+         value: "ID18 Grid current DC component sampling error"
+      -  key: 4
+         value: "ID19 Grid voltage sampling error (DC side)"
+      -  key: 8
+         value: "ID20 Grid voltage sampling error (AC side)"
+      -  key: 16
+         value: "ID21 Leakage current sampling error (DC side)"
+      -  key: 32
+         value: "ID22 Leakage current sampling error (AC side)"
+      -  key: 64
+         value: "ID23 Load voltage DC component sampling error"
+      -  key: 128
+         value: "ID24 DC input current sampling error"
+      -  key: 256
+         value: "ID25 DC component sampling error of grid current"
+      -  key: 512
+         value: "ID26 DC input branch current sampling error"
+      -  key: 4096
+         value: "ID29 Leakage current consistency error"
+      -  key: 8192
+         value: "ID30 Grid voltage consistency error"
+      -  key: 16384
+         value: "ID31 DCI consistency error"      
+      icon: 'mdi:wrench'
 
-    - name: "Charge / Discharge Power"
-      class: "power"
-      state_class: "measurement"
-      uom: "kW"
-      scale: 0.1
-      rule: 2
-      registers: [0x0667]
-      icon: 'mdi:battery-charging-50'
-      # NEW ICON! TODO: MOVE TO ANOTHER GROUP
+    - name: "Fault 03"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0407]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID33 SPI communication error (DC side)"
+      -  key: 2
+         value: "ID34 SPI communication error (AC side)"
+      -  key: 4
+         value: "ID35 Chip error (DC side)"
+      -  key: 8
+         value: "ID36 Chip error (AC side)"
+      -  key: 16
+         value: "ID37 Auxiliary power error"
+      -  key: 32
+         value: "ID38 Inverter soft-start failure"
+      -  key: 256
+         value: "ID41 Relay detection failure"
+      -  key: 512
+         value: "ID42 Low insulation impedance"
+      -  key: 1024
+         value: "ID43 Grounding error"
+      -  key: 2048
+         value: "ID44 Input mode setting error"
+      -  key: 4096
+         value: "ID45 CT error"
+      -  key: 8192
+         value: "ID46 Input reversal error"
+      -  key: 16384
+         value: "ID47 Parallel error"
+      -  key: 32768
+         value: "ID48 Serial number error"
+      icon: 'mdi:wrench'
 
-    - name: "Feed in / out power"
-      class: "power"
-      state_class: "measurement"
-      uom: "kW"
-      scale: 0.01
-      rule: 2
-      registers: [0x0488]
-      icon: 'mdi:lightning-bolt'
-      # TODO: MOVE TO ANOTHER GROUP
+    - name: "Fault 04"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0408]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID49 Battery temperature protection"
+      -  key: 2
+         value: "ID50 Heatsink 1 temperature protection"
+      -  key: 4
+         value: "ID51 Heatsink 2 temperature protection"
+      -  key: 8
+         value: "ID52 Heatsink 3 temperature protection"
+      -  key: 16
+         value: "ID53 Heatsink 4 temperature protection"
+      -  key: 32
+         value: "ID54 Heatsink 5 temperature protection"
+      -  key: 64
+         value: "ID55 Heatsink 6 temperature protection"
+      -  key: 256
+         value: "ID57 Ambient 1 temperature protection"
+      -  key: 512
+         value: "ID58 Ambient 2 temperature protection"
+      -  key: 1024
+         value: "ID59 Module 1 temperature protection"
+      -  key: 2048
+         value: "ID60 Module 2 temperature protection"
+      -  key: 4096
+         value: "ID61 Module 3 temperature protection"
+      -  key: 8192
+         value: "ID62 Module temperature difference too large"
+      icon: 'mdi:wrench'
 
-#    - name: "Input/Output Power"
-#      class: "power"
-#      state_class: "measurement"
-#      uom: "kW"
-#      scale: 0.01
-#      rule: 2
-#      registers: [0x0485]
-#      icon: 'mdi:lightning-bolt'
-#      # TODO: REMOVE?
+    - name: "Fault 05"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0409]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID65 Bus voltage RMS unbalance"
+      -  key: 2
+         value: "ID66 Bus voltage transient value unbalance"
+      -  key: 4
+         value: "ID67 Undervoltage of busbar during grid connection"
+      -  key: 8
+         value: "ID68 Busbar low voltage"
+      -  key: 16
+         value: "ID69 PV over-voltage"
+      -  key: 32
+         value: "ID70 Battery over-voltage"
+      -  key: 64
+         value: "ID71 LLCBus over-voltage protection"
+      -  key: 128
+         value: "ID72 Inverter bus voltage RMS software over-voltage"
+      -  key: 256
+         value: "ID73 Inverter bus voltage transient value software over-voltage"
+      -  key: 512
+         value: "ID74 Flying cross capacitor over-voltage protection"
+      -  key: 1024
+         value: "ID75 Flying cross capacitor under-voltage protection"
+      icon: 'mdi:wrench'
 
-#    - name: "Energy Management Model"
-#      class: ""
-#      state_class: ""
-#      uom: ""
-#      scale: 1
-#      rule: 1
-#      registers: [0x10B2]
-#      icon: ''
-#
-#    - name: "DCI Current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "mA"
-#      scale: 1
-#      rule: 1
-#      registers: [0x023B]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "DCI Voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x023C]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid S Voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x0232]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid S Current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x0233]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid T voltage"
-#      class: "voltage"
-#      state_class: "measurement"
-#      uom: "V"
-#      scale: 0.1
-#      rule: 1
-#      registers: [0x0234]
-#      icon: 'mdi:lightning-bolt'
-#
-#    - name: "Grid T current"
-#      class: "current"
-#      state_class: "measurement"
-#      uom: "A"
-#      scale: 0.01
-#      rule: 1
-#      registers: [0x0235]
-#      icon: 'mdi:lightning-bolt'
+    - name: "Fault 06"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040A]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID81 Battery over-current software protection"
+      -  key: 2
+         value: "ID82 DCI over-current protection"
+      -  key: 4
+         value: "ID83 Output transient current protection"
+      -  key: 8
+         value: "ID84 Buck-boost software over-current"
+      -  key: 16
+         value: "ID85 Output RMS current protection"
+      -  key: 32
+         value: "ID86 PV istantaneous over-current software protection"
+      -  key: 64
+         value: "ID87 PV parallel current unbalance"
+      -  key: 128
+         value: "ID88 Output current unbalance"
+      -  key: 256
+         value: "ID89 PV over-current software protection"
+      -  key: 512
+         value: "ID90 Balanced circuit over-current protection"
+      -  key: 1024
+         value: "ID91 Resonance protection"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 07"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040B]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID97 LLCBus hardware over-voltage"
+      -  key: 2
+         value: "ID98 Inverter bus hardware over-voltage"
+      -  key: 4
+         value: "ID99 Buck-boost hardware over-voltage"
+      -  key: 8
+         value: "ID100 Battery hardware over-current"
+      -  key: 32
+         value: "ID102 PV hardware over-current"
+      -  key: 64
+         value: "ID103 AC output hardware over-current"
+      -  key: 256
+         value: "ID105 Power meter error"
+      -  key: 512
+         value: "ID106 Serial number model error"
+      -  key: 8192
+         value: "ID110 Overload protection 1"
+      -  key: 16384
+         value: "ID110 Overload protection 1"
+      -  key: 32768
+         value: "ID110 Overload protection 1"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 08"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040C]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID113 Over-temperature derating"
+      -  key: 2
+         value: "ID114 Frequency derating"
+      -  key: 4
+         value: "ID115 Frequency loading"
+      -  key: 8
+         value: "ID116 Voltage derating"
+      -  key: 16
+         value: "ID117 Voltage loading"
+      -  key: 256
+         value: "ID121 Lightning protection failure (DC)"
+      -  key: 512
+         value: "ID122 Lightning protection failure (AC)"
+      -  key: 2048
+         value: "ID124 Battery low voltage protection"
+      -  key: 4096
+         value: "ID125 Battery low voltage shutdown"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 09"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040D]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID129 Output hardware over-current permanent fault"
+      -  key: 2
+         value: "ID130 Bus over-voltage permanent fault"
+      -  key: 4
+         value: "ID131 Bus hardware over-voltage permanent fault"
+      -  key: 8
+         value: "ID132 PV unbalanced flow permanent fault"
+      -  key: 16
+         value: "ID133 Battery over-current permanennt fault in EPS mode"
+      -  key: 32
+         value: "ID134 Output transient over-current permanent fault"
+      -  key: 64
+         value: "ID135 Output current unbalanced permanent fault"
+      -  key: 256
+         value: "ID137 Input mode setting error permanent fault"
+      -  key: 512
+         value: "ID138 Input over-current permanent fault"
+      -  key: 1024
+         value: "ID139 Input hardware over-current permanent fault"
+      -  key: 2048
+         value: "ID140 Relay permanent fault"
+      -  key: 4096
+         value: "ID141 Bus unbalance permanent fault"
+      -  key: 8192
+         value: "ID142 Lightning protection permanent fault (DC side)"
+      -  key: 16384
+         value: "ID143 Lightning protection permanent fault (AC side)"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 10"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040E]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID145 USB fault"
+      -  key: 2
+         value: "ID146 Wi-Fi fault"
+      -  key: 4
+         value: "ID147 Bluetooth fault"
+      -  key: 8
+         value: "ID148 RTC clock fault"
+      -  key: 16
+         value: "ID149 Communication board EEPROM error"
+      -  key: 32
+         value: "ID150 Communication board FLASH error"
+      -  key: 128
+         value: "ID152 Safety regulation version error"
+      -  key: 256
+         value: "ID153 SCI communication error (DC side)"
+      -  key: 512
+         value: "ID154 SCI communication error (AC side)"
+      -  key: 1024
+         value: "ID155 SCI communication error (convergence board side)"
+      -  key: 2048
+         value: "ID156 Software version inconsistency"
+      -  key: 4096
+         value: "ID157 Lithium battery communication error"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 11"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x040F]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID161 Forced shutdown"
+      -  key: 2
+         value: "ID162 Remote shutdown"
+      -  key: 4
+         value: "ID163 DRMS0 shutdown"
+      -  key: 16
+         value: "ID165 Remote derating"
+      -  key: 32
+         value: "ID166 Logic interface derating"
+      -  key: 64
+         value: "ID167 Anti-reverse flow derating"
+      -  key: 256
+         value: "ID169 Fan 1 failure"
+      -  key: 16384
+         value: "ID175 Fan 1 failure"
+      icon: 'mdi:wrench'
+
+    - name: "Fault 12"
+      class: ""
+      state_class: ""
+      uom: ""
+      scale: 1
+      rule: 1
+      registers: [0x0410]
+      isstr: true
+      lookup:
+      -  key: 0
+         value: "No error"
+      -  key: 1
+         value: "ID177 BMS over-voltage alarm"
+      -  key: 2
+         value: "ID178 BMS under-voltage alarm"
+      -  key: 4
+         value: "ID179 BMS high temperature alarm"
+      -  key: 8
+         value: "ID180 BMS low temperature alarm"
+      -  key: 16
+         value: "ID181 BMS charge/discharge overload alarm"
+      -  key: 32
+         value: "ID182 BMS short-circuit alarm"
+      icon: 'mdi:wrench'
