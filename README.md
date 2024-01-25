@@ -1,3 +1,18 @@
+# virtualdj's fork features
+
+This fork has been created to support the **ZCS Azzurro HYD5000** HP inverter (and HYD3000-HYD6000 HP models of course), using the provided inverter definition file `zcs_azzurro_hyd5000_hp.yaml`.
+
+These feature have been added:
+
+- Display of Modbus **addresses in HEX format** in the logs (PR: StephanJoubert/home_assistant_solarman#495)
+- Fix for the YAML file selection on the UI (PR: StephanJoubert/home_assistant_solarman#496)
+- `scale` parameter automatically defaulted to 1 (PR: StephanJoubert/home_assistant_solarman#497)
+- Status entities moved to *Diagnostic* category (PR: StephanJoubert/home_assistant_solarman#498)
+- New `scale_division` parameter for unit conversions, such as operating hours instead of minutes (PR: StephanJoubert/home_assistant_solarman#501)
+- New sensor with the **last event ID** together with date and time (to troubleshoot inverter faults afterwards)
+- Last update sensor date format changed to YMD, to match with last event ID
+- Complete rewrite of the inverter definition file for HYD5000 HP with useful sensors only
+
 # Solarman integration
 
 Home Assistant component for interacting with Solarman data collectors used with a variety of inverters. The integration allows Home Assistant to connect in direct-mode over the local network to the collector to extract the information, and no cables are required.
